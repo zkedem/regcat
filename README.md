@@ -16,7 +16,7 @@ Starting with version 2.0.0, regcat supports drag-and-drop. Simply select your r
 ![A "Save as…" dialog showing the user's Desktop folder. The dialog bears the title "Save HTML Document".](/images/saveas.png)\
 Select a folder, type in a file name (e.g. MyAwesomeRegistryFile.reg), then click "Save".\
 \
-This feature is powered by an HTML application and JavaScript embedded in the batch file. See [here](https://www.dostips.com/forum/viewtopic.php?t=6581) for more info on how it works.
+This feature is powered by HTML and JavaScript embedded in the batch file. See [here](https://www.dostips.com/forum/viewtopic.php?t=6581) for more info on how it works.
 
 ## Context menu support
 You can also use regcat from the context menu in File Explorer. To enable context menu support, use this command:
