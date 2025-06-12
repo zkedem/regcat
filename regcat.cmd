@@ -6,8 +6,8 @@ SET "filelist= "
 ECHO %CMDCMDLINE% | findstr /R /C:"%COMSPEC%" /C:"/[Cc]" /C:"%~dpf0" 1>NUL 2>NUL
 IF ERRORLEVEL 1 ( :: Command line mode
 	SET "needshelp=0"
-	IF "%1" == "" SET /A "needshelp=1"
-	IF "%1" == "/?" SET /A "needshelp|=1"
+	IF "%~1" == "" SET /A "needshelp=1"
+	IF "%~1" == "/?" SET /A "needshelp|=1"
 	IF !needshelp! NEQ 0 ( :: If no arguments or /? as only argument
 		ECHO Concatenates Windows Registry files to a single file. 1>&2
 		ECHO. 1>&2
@@ -19,12 +19,12 @@ IF ERRORLEVEL 1 ( :: Command line mode
 		ECHO     /O:filename  Output to filename. 1>&2
 		ECHO     /A           Add "Concatenate" to File Explorer context menu for .reg files. 1>&2
 		ECHO     /R           Remove "Concatenate" from File Explorer context menu. 1>&2
-	) ELSE IF "%1" == "/R" ( :: Remove from context menu
+	) ELSE IF "%~1" == "/R" ( :: Remove from context menu
 		reg DELETE HKCU\Software\Classes\regfile\shell\Concatenate /f 1>NUL 2>NUL
 		ECHO Removed "Concatenate" from File Explorer context menu. 1>&2
 		(CALL )
-	) ELSE IF "%1" == "/A" ( :: Add to context menu
-		reg ADD HKCU\Software\Classes\regfile\shell\Concatenate\command /ve /d "\"%~f0\" \"%%1\"" /f 1>NUL 2>NUL
+	) ELSE IF "%~1" == "/A" ( :: Add to context menu
+		reg ADD HKCU\Software\Classes\regfile\shell\Concatenate\command /ve /d "\"%~dpf0\" \"%%1\"" /f 1>NUL 2>NUL
 		ECHO Added "Concatenate" to File Explorer context menu. 1>&2
 		(CALL )
 	) ELSE (
@@ -40,11 +40,11 @@ IF ERRORLEVEL 1 ( :: Command line mode
 		TYPE !filelist! 2>NUL | findstr /R /V /C:"^Windows Registry Editor Version 5\.00$" >> "!filename!"
 	)
 ) ELSE ( :: GUI operation
-	IF NOT "%2" == "" ( :: Drag-and-drop mode
+	IF NOT "%~2" == "" ( :: Drag-and-drop mode
 		SET "htaargs=%*"
 	) ELSE ( :: Context menu mode
 		FOR /F "usebackq delims=" %%a IN (`mshta "%~f0" /U`) DO SET "uuid=%%a"
-		COPY "%1" "%TMP%\!uuid!.rgc" > NUL
+		COPY "%~1" "%TMP%\!uuid!.rgc" > NUL
 		SET "htaargs=/D:"%TMP%^" /E /S:2 /X:rgc"
 	)
 	START /B mshta "%~f0" !htaargs!
@@ -171,7 +171,8 @@ GOTO :EOF
 					var files = [];
 					for (var e = new Enumerator(allFiles); !e.atEnd(); e.moveNext()) {
 						var currentFile = e.item();
-						if (fso.GetExtensionName(currentFile.Path) == extension) {
+						var extensionName = fso.GetExtensionName(currentFile.Path);
+						if (extensionName.substring(extensionName.length - extension.length) == extension) {
 							files.push(currentFile);
 						}
 					}
@@ -198,7 +199,7 @@ GOTO :EOF
 					} else if (argv[i].substring(0, '/X:'.length) == '/X:') {
 						extension = argv[i].replace('/X:', '').replace(/^"|"$/g, '');
 					} else {
-						fileList.push(argv[i]);
+						fileList.push(argv[i].replace(/^"|"$/g, ''));
 					}
 				}
 				if (UUIDRequested) {
