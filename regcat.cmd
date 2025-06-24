@@ -74,6 +74,10 @@ GOTO :EOF
 					}
 				}
 			})();
+			onerror = function(message) {
+				alert(message);
+				close();
+			}
 			onload = function() {
 				var ForReading = 1;
 				var TristateUseDefault = -2;
@@ -126,8 +130,8 @@ GOTO :EOF
 					trigger.EndBoundary = xmlTime(new Date(startTime + 1000));
 					trigger.Id = 'TimeTriggerId';
 					trigger.Enabled = True;
-					action.Path = 'mshta.exe';
-					action.Arguments = argv[0];
+					action.Path = '%COMSPEC%';
+					action.Arguments = '/C START "" mshta.exe ' + argv[0] + ' ';
 					for (var i = 1; i < argv.length; i++) {
 						var argument = argv[i];
 						if (argument.substring(0, '/S:'.length) != '/S:') {
@@ -139,8 +143,7 @@ GOTO :EOF
 				}
 				function checkLength(a) {
 					if (a.length < 1) {
-						alert('You must specify at least one file.');
-						close();
+						throw new Error('You must specify at least one file.');
 					}
 				}
 				function consumeFile(fileHandle) {
